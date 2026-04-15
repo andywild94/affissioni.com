@@ -32,3 +32,17 @@
 .glass-card {
   @apply bg-white/10 backdrop-blur-md border border-white/20;
 }
+
+@keyframes scroll-logos {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-scroll-logos {
+  animation: scroll-logos 28s linear infinite;
+  width: max-content;
+}
+
+.animate-scroll-logos:hover {
+  animation-play-state: paused;
+}
