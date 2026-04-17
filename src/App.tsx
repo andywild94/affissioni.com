@@ -40,6 +40,9 @@ const partnerLogos = [logo1, logo2, logo3, logo4, logo6, logo7, logo8];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navItems = ["AZIENDA", "PRODOTTI", "CONTATTI", "BLOG", "CASI STUDIO"];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -47,45 +50,128 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  // Close on desktop resize
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 overflow-hidden">
-      {/* Background layer — slides down from top on scroll */}
-      <div
-        className="absolute inset-0 transition-transform duration-500 ease-out"
-        style={{
-          transform: scrolled ? 'translateY(0)' : 'translateY(-100%)',
-          background: 'rgba(10, 22, 40, 0.93)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-        }}
-      />
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50">
+        {/* Background layer — slides down from top on scroll or menu open */}
+        <div
+          className="absolute inset-0 transition-transform duration-500 ease-out"
+          style={{
+            transform: scrolled || menuOpen ? 'translateY(0)' : 'translateY(-100%)',
+            background: 'rgba(10, 22, 40, 0.93)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-8 h-[72px] flex items-center">
-        {/* Left nav links */}
-        <div className="flex items-center gap-8">
-          {["AZIENDA", "PRODOTTI", "CONTATTI", "BLOG"].map((item) => (
-            <a key={item} href="#" className="text-[11px] font-bold tracking-[0.14em] text-white/80 hover:text-white transition-colors">
-              {item}
-            </a>
-          ))}
-        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 h-[72px] flex items-center">
+          {/* Desktop left nav links */}
+          <div className="hidden md:flex items-center gap-8">
+            {["AZIENDA", "PRODOTTI", "CONTATTI", "BLOG"].map((item) => (
+              <a key={item} href="#" className="text-[11px] font-bold tracking-[0.14em] text-white/80 hover:text-white transition-colors">
+                {item}
+              </a>
+            ))}
+          </div>
 
-        {/* Center logo absolutely positioned */}
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <img src={logoSrc} alt="affissione.com" className="h-9 brightness-200" />
-        </div>
-
-        {/* Right: CASI STUDIO + CTA button */}
-        <div className="flex items-center gap-6 ml-auto">
-          <a href="#" className="text-[11px] font-bold tracking-[0.14em] text-white/80 hover:text-white transition-colors">
-            CASI STUDIO
-          </a>
-          <button className="gradient-teal text-white px-6 py-2.5 rounded-full text-[11px] font-bold tracking-[0.05em] transition-all">
-            RICHEDI UN PREVENTIVO
+          {/* Mobile hamburger button */}
+          <button
+            className="md:hidden flex flex-col justify-center items-center w-10 h-10 -ml-2 relative z-10 shrink-0"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span
+              className="block w-6 h-[2px] bg-white rounded-full"
+              style={{
+                transition: 'transform 300ms ease',
+                transform: menuOpen ? 'rotate(45deg) translateY(7px)' : 'none',
+              }}
+            />
+            <span
+              className="block w-6 h-[2px] bg-white rounded-full my-[5px]"
+              style={{
+                transition: 'opacity 300ms ease',
+                opacity: menuOpen ? 0 : 1,
+              }}
+            />
+            <span
+              className="block w-6 h-[2px] bg-white rounded-full"
+              style={{
+                transition: 'transform 300ms ease',
+                transform: menuOpen ? 'rotate(-45deg) translateY(-7px)' : 'none',
+              }}
+            />
           </button>
+
+          {/* Center logo absolutely positioned */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <img src={logoSrc} alt="affissione.com" className="h-9 brightness-200" />
+          </div>
+
+          {/* Desktop right: CASI STUDIO + CTA button */}
+          <div className="hidden md:flex items-center gap-6 ml-auto">
+            <a href="#" className="text-[11px] font-bold tracking-[0.14em] text-white/80 hover:text-white transition-colors">
+              CASI STUDIO
+            </a>
+            <button className="gradient-teal text-white px-6 py-2.5 rounded-full text-[11px] font-bold tracking-[0.05em] transition-all">
+              RICHEDI UN PREVENTIVO
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile menu overlay */}
+      <div
+        className="md:hidden fixed left-0 right-0 bottom-0 z-40"
+        style={{
+          top: '72px',
+          background: 'rgba(10, 22, 40, 0.97)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          transition: 'opacity 300ms ease, visibility 300ms ease',
+          opacity: menuOpen ? 1 : 0,
+          visibility: menuOpen ? 'visible' : 'hidden',
+          overflowY: 'auto',
+        }}
+      >
+        <div className="flex flex-col px-8 pt-8 pb-16">
+          {navItems.map((item, i) => (
+            <motion.a
+              key={item}
+              href="#"
+              animate={menuOpen ? { opacity: 1, x: 0 } : { opacity: 0, x: -24 }}
+              transition={{ duration: 0.3, delay: menuOpen ? i * 0.07 : 0 }}
+              className="text-white/80 hover:text-white font-bold text-2xl tracking-[0.06em] py-5 border-b border-white/10 block"
+              onClick={() => setMenuOpen(false)}
+            >
+              {item}
+            </motion.a>
+          ))}
+          <motion.div
+            animate={menuOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.3, delay: menuOpen ? navItems.length * 0.07 : 0 }}
+            className="mt-10"
+          >
+            <button className="gradient-teal text-white w-full py-4 rounded-full text-sm font-bold tracking-[0.05em]">
+              RICHIEDI UN PREVENTIVO
+            </button>
+          </motion.div>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
 
@@ -369,7 +455,8 @@ const Process = () => {
   useEffect(() => {
     const handleScroll = () => {
       const wrapper = wrapperRef.current;
-      if (!wrapper) return;
+      // Skip on mobile (element hidden, offsetHeight = 0)
+      if (!wrapper || wrapper.offsetHeight === 0) return;
       const wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
       const maxScroll = wrapper.offsetHeight - window.innerHeight;
       const rawProgress = Math.max(0, Math.min(1, (window.scrollY - wrapperTop) / maxScroll));
@@ -385,203 +472,261 @@ const Process = () => {
   }, [total]);
 
   return (
-    <div ref={wrapperRef} style={{ height: '700vh' }}>
-      <div className="sticky top-0 h-screen bg-gray-50 flex flex-col justify-center overflow-hidden">
+    <>
+      {/* ── DESKTOP version: sticky scroll animation ── */}
+      <div ref={wrapperRef} className="hidden md:block" style={{ height: '700vh' }}>
+        <div className="sticky top-0 h-screen bg-gray-50 flex flex-col justify-center overflow-hidden">
 
-        {/* ── Header ── */}
-        <div className="pb-5 px-14 md:px-20 shrink-0 text-center">
+          {/* Header */}
+          <div className="pb-5 px-14 md:px-20 shrink-0 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-teal/10 text-brand-teal text-xs font-bold tracking-wider uppercase mb-4">
+              Il Processo
+            </div>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-2">
+              La tua{' '}
+              <em className="not-italic italic text-brand-teal">campagna</em>
+              {' '}in 7 step
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto text-sm leading-relaxed">
+              Un percorso strutturato per trasformare la tua idea pubblicitaria in una campagna di successo sul territorio.
+            </p>
+          </div>
+
+          {/* Progress track */}
+          <div className="px-14 md:px-20 shrink-0 mb-3">
+            <div className="relative h-[3px] bg-gray-200 rounded-full">
+              {/* Fill */}
+              <div
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{
+                  width: `${(activeStep / (total - 1)) * 100}%`,
+                  transition: 'width 600ms ease',
+                  background: 'linear-gradient(90deg, #004040, #008080)',
+                }}
+              />
+              {/* Dots */}
+              {processSteps.map((_, i) => {
+                const isActive = i === activeStep;
+                const isPast = i < activeStep;
+                return (
+                  <div
+                    key={i}
+                    className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${(i / (total - 1)) * 100}%` }}
+                  >
+                    <div
+                      className="rounded-full border-2 transition-all duration-500"
+                      style={{
+                        width: isActive ? 16 : 12,
+                        height: isActive ? 16 : 12,
+                        background: isPast || isActive ? '#008080' : '#fff',
+                        borderColor: isPast || isActive ? '#008080' : '#d1d5db',
+                        boxShadow: isActive ? '0 0 0 4px rgba(0,128,128,0.18), 0 0 14px rgba(0,128,128,0.45)' : 'none',
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Step labels */}
+            <div className="flex justify-between mt-3">
+              {processSteps.map((s, i) => (
+                <span
+                  key={i}
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{
+                    transition: 'color 400ms ease',
+                    color: i === activeStep ? 'var(--color-brand-teal)'
+                      : i < activeStep ? 'rgba(0,128,128,0.4)'
+                        : '#d1d5db',
+                  }}
+                >
+                  {s.title}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Horizontal card row */}
+          <div className="shrink-0 px-14 md:px-20 overflow-hidden" style={{ height: 280 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: CARD_GAP,
+                transform: `translateX(-${activeStep * STEP_SIZE}px)`,
+                transition: 'transform 700ms cubic-bezier(0.22,1,0.36,1)',
+                height: '100%',
+                alignItems: 'center',
+              }}
+            >
+              {processSteps.map((s, i) => {
+                const isActive = i === activeStep;
+                const isPast = i < activeStep;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      width: CARD_W,
+                      flexShrink: 0,
+                      height: 260,
+                      borderRadius: 24,
+                      padding: '2rem',
+                      background: '#fff',
+                      border: isActive ? '1.5px solid rgba(0,128,128,0.3)' : '1.5px solid #f0f0f0',
+                      boxShadow: isActive
+                        ? '0 8px 40px rgba(0,128,128,0.13), 0 2px 8px rgba(0,0,0,0.06)'
+                        : '0 2px 8px rgba(0,0,0,0.04)',
+                      opacity: isActive ? 1 : isPast ? 0.45 : 0.35,
+                      transform: isActive ? 'scale(1)' : 'scale(0.97)',
+                      transition: 'opacity 500ms ease, transform 500ms ease, box-shadow 500ms ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {/* Watermark number */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: -8,
+                        top: -8,
+                        fontSize: '7rem',
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: 700,
+                        lineHeight: 1,
+                        color: 'rgba(0,128,128,0.05)',
+                        userSelect: 'none',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {s.num}
+                    </div>
+
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                        color: '#008080',
+                        display: 'block',
+                        marginBottom: 10,
+                      }}>
+                        {s.subtitle}
+                      </span>
+                      <h3 style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '1.6rem',
+                        fontWeight: 700,
+                        color: '#001a1a',
+                        marginBottom: 14,
+                        lineHeight: 1.2,
+                      }}>
+                        {s.title}
+                      </h3>
+                      <p style={{ color: '#6b7280', fontSize: '0.92rem', lineHeight: 1.65 }}>
+                        {s.desc}
+                      </p>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginTop: 16,
+                    }}>
+                      <div style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: '50%',
+                        background: isActive ? 'linear-gradient(135deg, #008080, #004040)' : '#f3f4f6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'background 500ms ease',
+                      }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#fff' : '#9ca3af' }}>
+                          {s.num}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500 }}>
+                        Step {i + 1} di {total}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bottom hint */}
+          <div className="pb-4 text-center shrink-0">
+            <span className="text-xs text-gray-400 font-medium tracking-[0.18em] uppercase">
+              {activeStep + 1} / {total}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── MOBILE version: vertical stacked cards ── */}
+      <section className="md:hidden py-16 bg-gray-50 px-5">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-teal/10 text-brand-teal text-xs font-bold tracking-wider uppercase mb-4">
             Il Processo
           </div>
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-2">
+          <h2 className="text-3xl font-display font-bold mb-3">
             La tua{' '}
             <em className="not-italic italic text-brand-teal">campagna</em>
             {' '}in 7 step
           </h2>
-          <p className="text-gray-500 max-w-lg mx-auto text-sm leading-relaxed">
-            Un percorso strutturato per trasformare la tua idea pubblicitaria in una campagna di successo sul territorio.
+          <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
+            Un percorso strutturato per trasformare la tua idea pubblicitaria in una campagna di successo.
           </p>
         </div>
 
-        {/* ── Progress track ── */}
-        <div className="px-14 md:px-20 shrink-0 mb-3">
-          <div className="relative h-[3px] bg-gray-200 rounded-full">
-            {/* Fill */}
-            <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{
-                width: `${(activeStep / (total - 1)) * 100}%`,
-                transition: 'width 600ms ease',
-                background: 'linear-gradient(90deg, #004040, #008080)',
-              }}
-            />
-            {/* Dots */}
-            {processSteps.map((_, i) => {
-              const isActive = i === activeStep;
-              const isPast = i < activeStep;
-              return (
-                <div
-                  key={i}
-                  className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: `${(i / (total - 1)) * 100}%` }}
-                >
-                  <div
-                    className="rounded-full border-2 transition-all duration-500"
-                    style={{
-                      width: isActive ? 16 : 12,
-                      height: isActive ? 16 : 12,
-                      background: isPast || isActive ? '#008080' : '#fff',
-                      borderColor: isPast || isActive ? '#008080' : '#d1d5db',
-                      boxShadow: isActive ? '0 0 0 4px rgba(0,128,128,0.18), 0 0 14px rgba(0,128,128,0.45)' : 'none',
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+        {/* Vertical timeline */}
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute left-5 top-5 bottom-5 w-[2px] bg-gradient-to-b from-brand-teal to-brand-teal/10" />
 
-          {/* Step labels */}
-          <div className="flex justify-between mt-3">
+          <div className="space-y-5">
             {processSteps.map((s, i) => (
-              <span
+              <motion.div
                 key={i}
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{
-                  transition: 'color 400ms ease',
-                  color: i === activeStep ? 'var(--color-brand-teal)'
-                    : i < activeStep ? 'rgba(0,128,128,0.4)'
-                      : '#d1d5db',
-                }}
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="relative pl-16"
               >
-                {s.title}
-              </span>
+                {/* Step circle on timeline */}
+                <div
+                  className="absolute left-0 top-4 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-md"
+                  style={{ background: 'linear-gradient(135deg, #008080, #004040)' }}
+                >
+                  {s.num}
+                </div>
+
+                {/* Card */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-teal block mb-1">
+                    {s.subtitle}
+                  </span>
+                  <h3 className="font-display font-bold text-lg text-brand-navy leading-tight mb-2">
+                    {s.title}
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-
-        {/* ── Horizontal card row ── */}
-        <div className="shrink-0 px-14 md:px-20 overflow-hidden" style={{ height: 280 }}>
-          <div
-            style={{
-              display: 'flex',
-              gap: CARD_GAP,
-              transform: `translateX(-${activeStep * STEP_SIZE}px)`,
-              transition: 'transform 700ms cubic-bezier(0.22,1,0.36,1)',
-              height: '100%',
-              alignItems: 'center',
-            }}
-          >
-            {processSteps.map((s, i) => {
-              const isActive = i === activeStep;
-              const isPast = i < activeStep;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    width: CARD_W,
-                    flexShrink: 0,
-                    height: 260,
-                    borderRadius: 24,
-                    padding: '2rem',
-                    background: '#fff',
-                    border: isActive ? '1.5px solid rgba(0,128,128,0.3)' : '1.5px solid #f0f0f0',
-                    boxShadow: isActive
-                      ? '0 8px 40px rgba(0,128,128,0.13), 0 2px 8px rgba(0,0,0,0.06)'
-                      : '0 2px 8px rgba(0,0,0,0.04)',
-                    opacity: isActive ? 1 : isPast ? 0.45 : 0.35,
-                    transform: isActive ? 'scale(1)' : 'scale(0.97)',
-                    transition: 'opacity 500ms ease, transform 500ms ease, box-shadow 500ms ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  {/* Watermark number */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: -8,
-                      top: -8,
-                      fontSize: '7rem',
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      color: 'rgba(0,128,128,0.05)',
-                      userSelect: 'none',
-                      pointerEvents: 'none',
-                    }}
-                  >
-                    {s.num}
-                  </div>
-
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <span style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      letterSpacing: '0.18em',
-                      textTransform: 'uppercase',
-                      color: '#008080',
-                      display: 'block',
-                      marginBottom: 10,
-                    }}>
-                      {s.subtitle}
-                    </span>
-                    <h3 style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '1.6rem',
-                      fontWeight: 700,
-                      color: '#001a1a',
-                      marginBottom: 14,
-                      lineHeight: 1.2,
-                    }}>
-                      {s.title}
-                    </h3>
-                    <p style={{ color: '#6b7280', fontSize: '0.92rem', lineHeight: 1.65 }}>
-                      {s.desc}
-                    </p>
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    marginTop: 16,
-                  }}>
-                    <div style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '50%',
-                      background: isActive ? 'linear-gradient(135deg, #008080, #004040)' : '#f3f4f6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'background 500ms ease',
-                    }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: isActive ? '#fff' : '#9ca3af' }}>
-                        {s.num}
-                      </span>
-                    </div>
-                    <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 500 }}>
-                      Step {i + 1} di {total}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Bottom hint ── */}
-        <div className="pb-4 text-center shrink-0">
-          <span className="text-xs text-gray-400 font-medium tracking-[0.18em] uppercase">
-            {activeStep + 1} / {total}
-          </span>
-        </div>
-
-      </div>
-    </div>
+      </section>
+    </>
   );
 };
 
@@ -606,7 +751,7 @@ const CtaBanner = () => (
         />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-end h-full p-12 md:p-16" style={{ minHeight: 420 }}>
+        <div className="relative z-10 flex flex-col justify-end h-full p-10 md:p-16" style={{ minHeight: 420 }}>
           <div className="max-w-xl">
             {/* Label */}
             <span className="text-xs font-bold tracking-[0.22em] uppercase text-brand-teal-light block mb-4">
@@ -720,9 +865,9 @@ const Contact = () => (
   <section className="py-24 bg-white">
     <div className="max-w-7xl mx-auto px-6">
       <div className="bg-brand-navy rounded-[3rem] overflow-hidden flex flex-col lg:flex-row">
-        <div className="lg:w-1/2 p-12 lg:p-20 text-white flex flex-col justify-between">
+        <div className="lg:w-1/2 p-10 lg:p-20 text-white flex flex-col justify-between">
           <div>
-            <h2 className="text-5xl font-display font-bold mb-8">Iniziamo il Brief</h2>
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-8">Iniziamo il Brief</h2>
             <p className="text-gray-400 text-lg mb-12">
               Raccontaci il tuo progetto. I nostri consulenti svilupperanno una strategia di affissione su misura per massimizzare il tuo ROI.
             </p>
@@ -750,7 +895,7 @@ const Contact = () => (
           </div>
         </div>
 
-        <div className="lg:w-1/2 bg-gray-50 p-12 lg:p-20">
+        <div className="lg:w-1/2 bg-gray-50 p-10 lg:p-20">
           <form className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
