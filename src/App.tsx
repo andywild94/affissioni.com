@@ -195,9 +195,28 @@ const Hero = () => (
         transition={{ duration: 0.6 }}
         className="max-w-4xl mx-auto"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-xs font-bold uppercase tracking-widest mb-8">
-          <div className="w-2 h-2 rounded-full bg-brand-teal-light animate-pulse" />
-          Leader in Out-of-Home
+        <div className="inline-flex items-center gap-4 px-5 py-3 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm mb-8">
+          {/* Overlapping avatars */}
+          <div className="flex -space-x-3 shrink-0">
+            {[
+              "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200",
+              "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200",
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
+            ].map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="w-10 h-10 rounded-full object-cover border-2 border-white/30 shadow-sm"
+              />
+            ))}
+          </div>
+          {/* Text */}
+          <div className="text-left">
+            <div className="text-sm font-bold text-white leading-tight">Oltre 100 aziende</div>
+            <div className="text-xs text-white/60 leading-tight">hanno usufruito del nostro servizio</div>
+          </div>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-display font-bold leading-[1.1] mb-8">
@@ -216,7 +235,7 @@ const Hero = () => (
             style={{ background: 'linear-gradient(135deg, #008080 0%, #00a8a8 100%)' }}
           />
           <button className="relative gradient-teal text-white px-10 py-4 rounded-full text-lg font-bold transition-all hover:scale-[1.04] hover:brightness-110">
-            Inizia Ora
+            Richiedi Preventivo
           </button>
         </div>
 
